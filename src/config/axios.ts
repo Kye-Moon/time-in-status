@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from "src/config/axios";
 import mondaySdk from "monday-sdk-js";
 
 const api = axios.create({
