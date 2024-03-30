@@ -1,4 +1,5 @@
-import {Button} from "@/Primitives/Button/Button";
+import React from 'react';
+import Logo from '../../public/img_1.png';
 
 export default function ProductsGrid() {
     return (
@@ -31,7 +32,7 @@ export default function ProductsGrid() {
                     </div>
                     <div className="p-2 w-2/3 flex justify-center items-center">
                         <div className="inline-block  p-2 rounded-lg shadow-md relative overflow-hidden">
-                            <img src="../../public/img_1.png" alt="Hero"
+                            <img src={Logo} alt="Hero"
                                  className="relative rounded-lg shadow-lg shadow-indigo-900"/>
                         </div>
                     </div>
