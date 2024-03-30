@@ -1,0 +1,55 @@
+{
+  "name": "monday-react-quickstart-app",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "npm run stop && concurrently \"npm run server\" \"npm run expose\"",
+    "build": "react-scripts build",
+    "expose": "mapps tunnel:create -p 8301",
+    "server": "react-scripts start",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "stop": "kill-port 8301 && kill-port 4049 && kill-port 4040"
+  },
+  "dependencies": {
+    "@mondaycom/apps-sdk": "^2.1.2",
+    "@tanstack/react-query": "^5.28.4",
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "@typescript-eslint/parser": "^7.2.0",
+    "autoprefixer": "^10.4.18",
+    "dayjs": "^1.11.10",
+    "monday-sdk-js": "^0.5.0",
+    "monday-ui-react-core": "^2.97.0",
+    "postcss": "^8.4.35",
+    "recoil": "^0.7.7",
+    "tailwindcss": "^3.4.1"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.16.7",
+    "@mondaycom/apps-cli": "^2.0.0",
+    "concurrently": "^5.2.0",
+    "cross-port-killer": "^1.2.1",
+    "eslint-config-react-app": "^7.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "^5.0.1",
+    "sass": "^1.54.8",
+    "typescript": "^4.9.5"
+  }
+}
