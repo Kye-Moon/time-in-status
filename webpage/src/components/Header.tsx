@@ -1,5 +1,5 @@
 import {useState} from "react";
-import logo from "../assets/Logo.png";
+import logo from "/Logo.png";
 import {useNavigate} from "@tanstack/react-router";
 
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import Logo from '../../public/img_1.png';
+import Logo from '/img_1.png';
 
 export default function ProductsGrid() {
     return (
