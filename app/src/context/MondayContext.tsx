@@ -4,6 +4,7 @@ import mondaySdk from 'monday-sdk-js';
 interface MondayContextData {
     context?: any;
     settings?: any;
+    sessionToken?: any;
     filters?: any;
     isLoaded?: boolean;
     monday: mondaySdk.MondayClientSdk;
@@ -19,6 +20,7 @@ export const MondayProvider = ({children}) => {
     const monday = mondaySdk();
     const [context, setContext] = useState<any>();
     const [settings, setSettings] = useState<any>();
+    const [sessionToken, setSessionToken] = useState<any>()
 
     useEffect(() => {
 
@@ -32,6 +34,8 @@ export const MondayProvider = ({children}) => {
             setSettings(res.data);
         });
 
+        monday.get('sessionToken').then((token) => setSessionToken(token))
+
     }, []);
 
     return (
@@ -39,6 +43,7 @@ export const MondayProvider = ({children}) => {
             {
                 context,
                 settings,
+                sessionToken,
                 isLoaded: !!context && !!settings,
                 monday,
             }

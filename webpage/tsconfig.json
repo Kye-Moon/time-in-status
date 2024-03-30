@@ -1,0 +1,48 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "declaration": false,
+    "declarationMap": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "preserve",
+    "baseUrl": ".",
+    "paths": {
+      "@/Assets/*": ["*", "src/assets/*"],
+      "@/State/*": ["*", "src/state/*"],
+      "@/Components/*": ["*", "src/components/*"],
+      "@/Pages/*": ["*", "src/pages/*"],
+      "@/Primitives/*": ["*", "src/primitives/*"],
+      "@/Lib/*": ["*", "src/lib/*"],
+      "@/Services/*": ["*", "src/services/*"],
+      "@/Constants/*": ["*", "src/constants/*"],
+      "@/Context/*": ["*", "src/context/*"],
+      "@/Hooks/*": ["*", "src/hooks/*"],
+    }
+  },
+  "include": [
+    "src",
+    "tests",
+    "jest.config.js",
+    "cypress.config.ts",
+    "vite.config.ts",
+    "tailwind.config.js",
+    "postcss.config.js"
+  ],
+  "exclude": ["node_modules"]
+}

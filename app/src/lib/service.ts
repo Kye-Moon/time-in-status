@@ -165,20 +165,24 @@ export const getTimeInStatusColumns = (data: ParsedLogs[]): ITableColumn[] => {
             id: 'item_name',
             title: 'Name',
             infoContent: 'itemName',
+            width: {
+                max: 350,
+                min: 200,
+            },
         },
         {
             id: 'assigned_to',
             title: 'Assigned To',
             loadingStateType: 'circle',
-            width: {
-                max: 200,
-                min: 120,
-            },
         },
         {
             id: 'status',
             title: 'Status',
             loadingStateType: 'medium-text',
+            width: {
+                max: 200,
+                min: 120,
+            },
         },
     ];
 
@@ -191,6 +195,10 @@ export const getTimeInStatusColumns = (data: ParsedLogs[]): ITableColumn[] => {
             title: status.toUpperCase(),
             infoContent: status,
             // Customize these as necessary
+            width: {
+                max: 250,
+                min: 120,
+            },
             loadingStateType: 'medium-text',
         });
     });
