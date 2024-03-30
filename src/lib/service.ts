@@ -92,7 +92,7 @@ export function mergeProcessedLogsAndItems(processedLogs: ItemDetails, itemsApiR
                 const statusDurationsArray: StatusDurationAndDetails[] = processedItem ? Object.entries(processedItem.statusDurationAndDetails).map(([status, duration]) => {
                     return {
                         status,
-                        duration,
+                        duration: typeof duration === 'number' ? duration : 0, // or handle the case appropriately if not a number
                     };
                 }) : [{
                     status: "NEW",

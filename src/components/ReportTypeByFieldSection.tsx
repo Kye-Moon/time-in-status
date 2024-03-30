@@ -3,7 +3,6 @@ import {Dropdown} from "monday-ui-react-core";
 import ReportTypeSelect from "./ReportTypeSelect";
 import StatusColumnSelect from "./StatusColumnSelect";
 
-``
 export default function ReportTypeByFieldSection() {
     return (
         <div className={'grid grid-cols-8 py-4 space-x-6'}>
