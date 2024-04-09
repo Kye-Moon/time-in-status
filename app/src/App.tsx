@@ -5,13 +5,11 @@ import "monday-ui-react-core/dist/main.css";
 import {Loader, ThemeProvider} from "monday-ui-react-core";
 import {useMondayContext} from "./context/MondayContext";
 import ViewLayout from "./components/ViewLayout";
-import ReportTypeByFieldSection from "./components/ReportTypeByFieldSection";
 
 // Usage of mondaySDK example, for more information visit here: https://developer.monday.com/apps/docs/introduction-to-the-sdk/
 
 const App = () => {
     const {isLoaded, context, sessionToken} = useMondayContext();
-    console.log('context', context?.user.isViewOnly ?? 'no user')
     return (
         <>
             {
