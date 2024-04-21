@@ -38,6 +38,8 @@ export const MondayProvider = ({children}) => {
 
     }, []);
 
+    monday.execute('valueCreatedForUser')
+
     return (
         <MondayContext.Provider value={
             {
