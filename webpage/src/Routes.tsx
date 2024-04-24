@@ -39,6 +39,7 @@ const termsOfServiceRoute = new Route({
 const routeTree = rootRoute.addChildren([
     indexRoute,
     privacyPolicyRoute,
+    termsOfServiceRoute
 ]);
 const router = new Router({
     routeTree,
