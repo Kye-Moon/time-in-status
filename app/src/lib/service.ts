@@ -17,7 +17,7 @@ function parseLogEntry(log: ActivityLog): StatusChange {
     return {
         board_id: data.board_id,
         pulse_id: data.pulse_id,
-        status: data.value.label.text,
+        status: data.value?.label.text ?? "NEW",
         timestamp: parseFloat(log.created_at.slice(0, 13))// Convert to seconds assuming the timestamp is in 100-nanoseconds
     };
 }

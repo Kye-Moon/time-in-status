@@ -17,6 +17,7 @@ interface ContextProps {
     boardUniqueGroups: string[];
     data: ParsedLogs[] | undefined;
     columnSettings: any;
+    isFetching?: boolean;
 }
 
 const BoardViewDataContext = createContext<ContextProps>({
@@ -33,6 +34,7 @@ const BoardViewDataContext = createContext<ContextProps>({
     boardUniquePeople: [],
     data: undefined,
     columnSettings: undefined,
+    isFetching: false
 });
 
 export const useBoardViewDataContext = () => useContext(BoardViewDataContext);
@@ -53,16 +55,19 @@ export const TISBoardViewProvider = ({children}) => {
     const [boardUniqueGroups, setBoardUniqueGroups] = useState<string[]>([])
 
     const [filteredData, setFilteredData] = useState<ParsedLogs[] | undefined>(undefined)
-
+    const [isFetching, setIsFetching] = useState<boolean>(false)
 
     useEffect(() => {
         async function fetchData() {
+            setIsFetching(true)
             if (!context || !context?.boardId || !columnId) {
+                setIsFetching(false)
                 return
             }
             const boardItemIdsQueryData = await monday.api(getBoardItems({boardId: context.boardId}))
             const itemIds = boardItemIdsQueryData.data.boards[0].items_page.items?.map((item: any) => item.id)
             if (!itemIds) {
+                setIsFetching(false)
                 return
             }
             const data = await monday.api(getBoardActivityLogs({
@@ -82,6 +87,7 @@ export const TISBoardViewProvider = ({children}) => {
             setBoardUniqueStatuses(Array.from(uniqueStatuses))
             setColumnSettings(statusSettings)
             setTISData(parsedData)
+            setIsFetching(false)
         }
 
         if (isLoaded && context && context?.boardId && columnId) {
@@ -130,7 +136,8 @@ export const TISBoardViewProvider = ({children}) => {
             boardUniquePeople: boardUniquePeople,
             data: filteredData,
             columnSettings: columnSettings,
-            boardUniqueStatuses: boardUniqueStatuses
+            boardUniqueStatuses: boardUniqueStatuses,
+            isFetching: isFetching
         }}>
             {children}
         </BoardViewDataContext.Provider>
