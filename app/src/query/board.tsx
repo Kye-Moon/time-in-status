@@ -1,3 +1,5 @@
+import {ITEMS_PER_PAGE} from "../context/TISBoardViewProvider";
+
 export const createTrackingBoardMutation = (key: string) => {
     return `
         mutation{
@@ -33,6 +35,8 @@ export const getBoardItems = ({boardId, cursor}: {
     boardId: string,
     cursor?: string
 }) => {
+    const cursorQueryPart = cursor ? `, cursor: "${cursor}"` : "";
+
     return `
         query{
           boards(ids:["${boardId}"]){
@@ -40,7 +44,8 @@ export const getBoardItems = ({boardId, cursor}: {
                  id
                  settings_str
             }
-            items_page(limit:500){
+            items_count
+            items_page(limit:${ITEMS_PER_PAGE} ${cursorQueryPart}){
                   cursor
                   items{
                     id
@@ -60,6 +65,7 @@ export const getBoardItems = ({boardId, cursor}: {
         }
     `;
 }
+
 
 export interface GetBoardStatusColumnsResponse {
     data: {

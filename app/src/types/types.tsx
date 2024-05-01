@@ -67,6 +67,7 @@ interface Data {
 interface Board {
     columns: Column[];
     items_page: ItemsPage;
+    items_count: number;
 }
 
 interface Column {

@@ -8,15 +8,23 @@ import {
     TableHeader,
     TableHeaderCell,
     TableRow,
-    Label
+    Label, Button
 } from "monday-ui-react-core";
 import {extractTISTableData, getTimeInStatusColumns, lookupLabelColor} from "../../../lib/service";
-import {useBoardViewDataContext} from "../../../context/TISBoardViewProvider";
+import {ITEMS_PER_PAGE, useBoardViewDataContext} from "../../../context/TISBoardViewProvider";
 import {hexToRgb} from "../../../lib/service";
 import TableBodyLoading from "../../Loading/TableBodyLoading";
 
 export default function TISTableSection() {
-    const {data, columnSettings, isFetching} = useBoardViewDataContext()
+    const {
+        data,
+        columnSettings,
+        isFetching,
+        itemCount,
+        pageNumber,
+        fetchNextPage,
+        fetchPreviousPage
+    } = useBoardViewDataContext()
     const [columns, setColumns] = useState<ITableColumn[]>([])
     const [tableData, setTableData] = useState<any[] | undefined>(undefined)
 
@@ -33,8 +41,9 @@ export default function TISTableSection() {
         <div className={'z-0 w-full'}>
             <Table withoutBorder={true} columns={columns} errorState={<p>Error</p>}
                    emptyState={<p>Empty</p>}>
-                {columns.length === 0 ? <Skeleton fullWidth={true} height={45}/> :
-                    <TableHeader>
+                {columns.length === 0
+                    ? <Skeleton fullWidth={true} height={45}/>
+                    : <TableHeader>
                         {columns.map((column: ITableColumn) => {
                             return <TableHeaderCell className={'text-center'} key={column.id} title={column.title}/>
                         })}
@@ -92,6 +101,22 @@ export default function TISTableSection() {
                         )}
                     </>
                 </TableBody>
+                <>
+                    {!isFetching && tableData && (
+                        <div className={'flex justify-end mx-6 space-x-4 items-center py-4'}>
+                            <div className={'flex flex-col text-xs'}>
+                                <h1>{`Showing ${tableData?.length} of ${itemCount} items`}</h1>
+                                <h2>{`Page ${pageNumber} of ${Math.ceil((itemCount ?? 1) / ITEMS_PER_PAGE)}`}</h2>
+                            </div>
+                            <div className={'flex space-x-1'}>
+                                <Button size={'small'} onClick={fetchPreviousPage}
+                                        className={'btn btn-primary mr-2'}>Previous</Button>
+                                <Button size={'small'} onClick={fetchNextPage}
+                                        className={'btn btn-primary'}>Next</Button>
+                            </div>
+                        </div>
+                    )}
+                </>
             </Table>
         </div>
     )

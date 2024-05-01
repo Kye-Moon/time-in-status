@@ -9,7 +9,10 @@ export default function TISBoardViewFiltersSection() {
         boardUniquePeople,
         setSelectedPeople,
         boardUniqueGroups,
-        setSelectedGroups
+        setSelectedGroups,
+        selectedGroups,
+        selectedPeople,
+        selectedStatuses
     } = useBoardViewDataContext()
 
     const [statusLabelAndValue, setStatusLabelAndValue] = React.useState<{
@@ -26,7 +29,6 @@ export default function TISBoardViewFiltersSection() {
         label: string,
         value: string
     }[]>([])
-
 
     React.useEffect(() => {
         if (boardUniqueStatuses) {
@@ -65,7 +67,7 @@ export default function TISBoardViewFiltersSection() {
                     options={groupLabelAndValue}
                     multi={true}
                     onChange={handleGroupSelect}
-                    defaultValues={[]}
+                    value={selectedGroups?.map(group => ({label: group, value: group}))}
                     placeholder={'Filter by Group'}
                 />
             </div>
@@ -77,8 +79,8 @@ export default function TISBoardViewFiltersSection() {
                     options={statusLabelAndValue}
                     multi={true}
                     onChange={handleStatusSelect}
+                    value={selectedStatuses?.map(status => ({label: status.toUpperCase(), value: status}))}
                     multiline={true}
-                    defaultValues={[]}
                     placeholder={'Filter by status'}
                 />
             </div>
@@ -90,7 +92,7 @@ export default function TISBoardViewFiltersSection() {
                     options={peopleLabelAndValue}
                     multi={true}
                     onChange={handlePeopleSelect}
-                    defaultValues={[]}
+                    value={selectedPeople?.map(person => ({label: person === '' ? 'Unassigned' : person, value: person}))}
                     placeholder={'Filter by person'}
                 />
             </div>

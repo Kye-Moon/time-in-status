@@ -261,23 +261,24 @@ function formatDuration(durationInMinutes: number) {
         const hours = Math.floor(durationInMinutes / minutesInHour);
         const minutes = durationInMinutes % minutesInHour;
         return `${hours}h ${minutes}m`;
-    } else if (durationInMinutes < minutesInHour * hoursInDay * daysInWeek) {
+    } else {
         const days = Math.floor(durationInMinutes / (minutesInHour * hoursInDay));
         const hours = Math.floor((durationInMinutes % (minutesInHour * hoursInDay)) / minutesInHour);
         return `${days}d ${hours}h`;
-    } else if (durationInMinutes < minutesInHour * hoursInDay * daysInWeek * weeksInMonth) {
-        const weeks = Math.floor(durationInMinutes / (minutesInHour * hoursInDay * daysInWeek));
-        const days = Math.floor((durationInMinutes % (minutesInHour * hoursInDay * daysInWeek)) / (minutesInHour * hoursInDay));
-        return `${weeks}w ${days}d`;
-    } else if (durationInMinutes < minutesInHour * hoursInDay * daysInWeek * weeksInMonth * monthsInYear) {
-        const months = Math.floor(durationInMinutes / (minutesInHour * hoursInDay * daysInWeek * weeksInMonth));
-        const weeks = Math.floor((durationInMinutes % (minutesInHour * hoursInDay * daysInWeek * weeksInMonth)) / (minutesInHour * hoursInDay * daysInWeek));
-        return `${months}mo ${weeks}w`;
-    } else {
-        const years = Math.floor(durationInMinutes / (minutesInHour * hoursInDay * daysInWeek * weeksInMonth * monthsInYear));
-        const months = Math.floor((durationInMinutes % (minutesInHour * hoursInDay * daysInWeek * weeksInMonth * monthsInYear)) / (minutesInHour * hoursInDay * daysInWeek * weeksInMonth));
-        return `${years}y ${months}mo`;
     }
+    // } else if (durationInMinutes < minutesInHour * hoursInDay * daysInWeek * weeksInMonth) {
+    //     const weeks = Math.floor(durationInMinutes / (minutesInHour * hoursInDay * daysInWeek));
+    //     const days = Math.floor((durationInMinutes % (minutesInHour * hoursInDay * daysInWeek)) / (minutesInHour * hoursInDay));
+    //     return `${weeks}w ${days}d`;
+    // } else if (durationInMinutes < minutesInHour * hoursInDay * daysInWeek * weeksInMonth * monthsInYear) {
+    //     const months = Math.floor(durationInMinutes / (minutesInHour * hoursInDay * daysInWeek * weeksInMonth));
+    //     const weeks = Math.floor((durationInMinutes % (minutesInHour * hoursInDay * daysInWeek * weeksInMonth)) / (minutesInHour * hoursInDay * daysInWeek));
+    //     return `${months}mo ${weeks}w`;
+    // } else {
+    //     const years = Math.floor(durationInMinutes / (minutesInHour * hoursInDay * daysInWeek * weeksInMonth * monthsInYear));
+    //     const months = Math.floor((durationInMinutes % (minutesInHour * hoursInDay * daysInWeek * weeksInMonth * monthsInYear)) / (minutesInHour * hoursInDay * daysInWeek * weeksInMonth));
+    //     return `${years}y ${months}mo`;
+    // }
 }
 
 export function hexToRgb(hex) {

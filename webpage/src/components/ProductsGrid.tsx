@@ -16,7 +16,7 @@ export default function ProductsGrid() {
                         </div>
                         <p className="text-gray-200 leading-6 py-6">
                             Dive into the intricacies of your projects with our Status Report app.
-                            Designed for the Monday.com marketplace, this tool illuminates the progress of each task,
+                            Designed for the monday.com marketplace, this tool illuminates the progress of each task,
                             displaying how long it's been in any given status.
                             Tailor-made for teams seeking to enhance accountability and efficiency, our app simplifies
                             project oversight and ensures that every task moves seamlessly towards completion.
