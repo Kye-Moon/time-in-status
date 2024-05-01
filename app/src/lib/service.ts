@@ -149,40 +149,46 @@ export function parseColumnSettings(columns, columnId) {
     }
 }
 
-export const getTimeInStatusColumns = (data: ParsedLogs[]): ITableColumn[] => {
+export interface ColumnWidths {
+    group?: { min: number; max: number };
+    item_id?: { min: number; max: number };
+    item_name?: { min: number; max: number };
+    assigned_to?: { min: number; max: number };
+    status?: { min: number; max: number };
+    total?: { min: number; max: number };
+}
+
+export const getTimeInStatusColumns = (data: ParsedLogs[], customWidths: ColumnWidths): ITableColumn[] => {
     let columns: ITableColumn[] = [
         {
             id: 'group',
             title: 'Group',
             loadingStateType: 'medium-text',
+            width: customWidths.group || { min: 200, max: 300 },
         },
         {
             id: 'item_id',
             title: 'Item ID',
             loadingStateType: 'medium-text',
+            width: customWidths.item_id || { min: 200, max: 250 },
         },
         {
             id: 'item_name',
             title: 'Name',
             infoContent: 'itemName',
-            width: {
-                max: 350,
-                min: 200,
-            },
+            width: customWidths.item_name || { min: 250, max: 350 }
         },
         {
             id: 'assigned_to',
             title: 'Assigned To',
             loadingStateType: 'circle',
+            width: customWidths.assigned_to || { min: 120, max: 200 }
         },
         {
             id: 'status',
             title: 'Status',
             loadingStateType: 'medium-text',
-            width: {
-                max: 200,
-                min: 120,
-            },
+            width: customWidths.status || { min: 150, max: 250 }
         },
     ];
 
@@ -194,7 +200,6 @@ export const getTimeInStatusColumns = (data: ParsedLogs[]): ITableColumn[] => {
             id: status.toUpperCase(),
             title: status.toUpperCase(),
             infoContent: status,
-            // Customize these as necessary
             width: {
                 max: 250,
                 min: 120,
@@ -207,6 +212,7 @@ export const getTimeInStatusColumns = (data: ParsedLogs[]): ITableColumn[] => {
         id: 'total',
         title: 'TOTAL',
         loadingStateType: 'medium-text',
+        width: customWidths.total || { min: 100, max: 200 }
     });
 
     return columns;

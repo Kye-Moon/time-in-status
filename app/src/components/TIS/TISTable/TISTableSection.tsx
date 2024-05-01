@@ -27,15 +27,60 @@ export default function TISTableSection() {
     } = useBoardViewDataContext()
     const [columns, setColumns] = useState<ITableColumn[]>([])
     const [tableData, setTableData] = useState<any[] | undefined>(undefined)
-
+    const [columnWidths, setColumnWidths] = useState({
+        group: {min: 50, max: 500},
+        item_id: {min: 100, max: 500},
+        item_name: {min: 200, max: 500},
+        assigned_to: {min: 100, max: 500},
+        status: {min: 100, max: 500},
+        total: {min: 100, max: 500},
+    });
 
     useEffect(() => {
         if (data) {
-            setColumns(getTimeInStatusColumns(data))
-            const preparedData = extractTISTableData(data, getTimeInStatusColumns(data));
+            setColumns(getTimeInStatusColumns(data, columnWidths));
+            const preparedData = extractTISTableData(data, getTimeInStatusColumns(data, columnWidths));
             setTableData(preparedData);
         }
     }, [data, columnSettings]);
+
+    useEffect(() => {
+        if (data) {
+            const newColumns = getTimeInStatusColumns(data, columnWidths);
+            setColumns(newColumns);
+        }
+    }, [data, columnWidths]);
+
+    const handleMouseDown = (columnId) => (e) => {
+        if (!columnWidths[columnId]) {
+            return;
+        }
+        const startWidth = columnWidths[columnId].min; // Use the min width for resizing
+        const startX = e.clientX;
+
+        const handleMouseMove = (e) => {
+            const currentX = e.clientX;
+            const newWidth = Math.max(
+                columnWidths[columnId]?.min, // Ensure new width is not less than min
+                Math.min(
+                    columnWidths[columnId]?.max, // Ensure new width is not greater than max
+                    startWidth + (currentX - startX)
+                )
+            );
+            setColumnWidths({
+                ...columnWidths,
+                [columnId]: {min: newWidth, max: columnWidths[columnId]?.max} // Only update the min width
+            });
+        };
+
+        const handleMouseUp = () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+    };
 
     return (
         <div className={'z-0 w-full'}>
@@ -44,10 +89,32 @@ export default function TISTableSection() {
                 {columns.length === 0
                     ? <Skeleton fullWidth={true} height={45}/>
                     : <TableHeader>
-                        {columns.map((column: ITableColumn) => {
-                            return <TableHeaderCell className={'text-center'} key={column.id} title={column.title}/>
-                        })}
+                        {columns.map((column) => (
+                            <div className={'relative text-center'} key={column.id}
+                                 style={{width: columnWidths[column.id]}}>
+                                <TableHeaderCell className={'text-center'} key={column.id} title={column.title}/>
+                                {columnWidths[column.id] && (
+                                    <div
+                                        className={'resize-handle hover:bg-gray-900 hover:rounder-xl hover:opacity-50 hover:cursor-col-resize absolute top-0 bottom-0 right-0 w-5'}
+                                        style={{
+                                            cursor: 'col-resize',
+                                            position: 'absolute',
+                                            right: 0,
+                                            top: 0,
+                                            bottom: 0,
+                                            width: '5px'
+                                        }}
+                                        onMouseDown={handleMouseDown(column.id)}
+                                    />
+                                )}
+                            </div>
+                        ))}
                     </TableHeader>
+                    // : <TableHeader>
+                    //     {columns.map((column: ITableColumn) => {
+                    //         return <TableHeaderCell className={'text-center'} key={column.id} title={column.title}/>
+                    //     })}
+                    // </TableHeader>
                 }
                 <TableBody>
                     <>

@@ -20,10 +20,12 @@
     "@typescript-eslint/parser": "^7.2.0",
     "autoprefixer": "^10.4.18",
     "dayjs": "^1.11.10",
+    "lucide-react": "^0.376.0",
     "monday-sdk-js": "^0.5.0",
     "monday-ui-react-core": "^2.97.0",
     "parse-gitignore": "^2.0.0",
     "postcss": "^8.4.35",
+    "re-resizable": "^6.9.16",
     "recoil": "^0.7.7",
     "tailwindcss": "^3.4.1"
   },
