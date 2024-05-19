@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {ITableColumn} from "monday-ui-react-core/dist/types/components/Table/Table/Table";
 import {
+    Button,
     Skeleton,
     Table,
     TableBody,
@@ -8,12 +9,12 @@ import {
     TableHeader,
     TableHeaderCell,
     TableRow,
-    Label, Button
+    Text
 } from "monday-ui-react-core";
-import {extractTISTableData, getTimeInStatusColumns, lookupLabelColor} from "../../../lib/service";
+import {extractTISTableData, getTimeInStatusColumns, hexToRgb, lookupLabelColor} from "../../../lib/service";
 import {ITEMS_PER_PAGE, useBoardViewDataContext} from "../../../context/TISBoardViewProvider";
-import {hexToRgb} from "../../../lib/service";
 import TableBodyLoading from "../../Loading/TableBodyLoading";
+import {TextType} from "monday-ui-react-core/dist/types/components/Text/TextConstants";
 
 export default function TISTableSection() {
     const {
@@ -110,20 +111,15 @@ export default function TISTableSection() {
                             </div>
                         ))}
                     </TableHeader>
-                    // : <TableHeader>
-                    //     {columns.map((column: ITableColumn) => {
-                    //         return <TableHeaderCell className={'text-center'} key={column.id} title={column.title}/>
-                    //     })}
-                    // </TableHeader>
                 }
                 <TableBody>
                     <>
                         {isFetching && <TableBodyLoading rows={5} columns={2}/>}
                         {!isFetching && tableData?.length === 0 && (
-                            <div className={'text-center text-xl font-semibold py-24'}>
-                                <h1>
-                                    No items found on the board
-                                </h1>
+                            <div className={'text-center text-xl  flex justify-center py-24'}>
+                                <Text
+                                    //@ts-ignore
+                                    type={"TextType.TEXT2"}> No items found on the board</Text>
                             </div>
                         )}
                         {!isFetching && tableData && (
@@ -172,14 +168,23 @@ export default function TISTableSection() {
                     {!isFetching && tableData && (
                         <div className={'flex justify-end mx-6 space-x-4 items-center py-4'}>
                             <div className={'flex flex-col text-xs'}>
-                                <h1>{`Showing ${tableData?.length} of ${itemCount} items`}</h1>
-                                <h2>{`Page ${pageNumber} of ${Math.ceil((itemCount ?? 1) / ITEMS_PER_PAGE)}`}</h2>
+                                <Text
+                                    //@ts-ignore
+                                    type={"TextType.TEXT2"}>{`Showing ${tableData?.length} of ${itemCount} items`}</Text>
+                                <Text
+                                    //@ts-ignore
+                                    type={"TextType.TEXT2"}>{`Page ${pageNumber} of ${Math.ceil((itemCount ?? 1) / ITEMS_PER_PAGE)}`}</Text>
                             </div>
                             <div className={'flex space-x-1'}>
-                                <Button size={'small'} onClick={fetchPreviousPage}
+                                <Button size={'small'}
+                                        disabled={Math.ceil((itemCount ?? 1) / ITEMS_PER_PAGE) === 1 || pageNumber === 1}
+                                        onClick={fetchPreviousPage}
                                         className={'btn btn-primary mr-2'}>Previous</Button>
-                                <Button size={'small'} onClick={fetchNextPage}
-                                        className={'btn btn-primary'}>Next</Button>
+                                <Button
+                                    disabled={Math.ceil((itemCount ?? 1) / ITEMS_PER_PAGE) === 1 || itemCount === 0 || pageNumber === Math.ceil((itemCount ?? 1) / ITEMS_PER_PAGE)}
+                                    size={'small'}
+                                    onClick={fetchNextPage}
+                                    className={'btn btn-primary'}>Next</Button>
                             </div>
                         </div>
                     )}

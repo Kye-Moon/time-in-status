@@ -1,134 +1,133 @@
 import {ITableColumn} from "monday-ui-react-core/dist/types/components/Table/Table/Table";
-import {
-    ActivityLog,
-    BoardApiResponse,
-    ItemDetails,
-    ParsedLogs,
-    StatusChange,
-    StatusDurationAndDetails, StatusSettings,
-} from "../types/types";
+import {ActivityLog, StatusDurations, StatusSettings,} from "../types/types";
 
 const dayjs = require('dayjs');
 
 
-// Function to parse a single log entry
-function parseLogEntry(log: ActivityLog): StatusChange {
-    const data = JSON.parse(log.data);
-    return {
-        board_id: data.board_id,
-        pulse_id: data.pulse_id,
-        status: data.value?.label.text ?? "NEW",
-        timestamp: parseFloat(log.created_at.slice(0, 13))// Convert to seconds assuming the timestamp is in 100-nanoseconds
-    };
+export interface StatusChange {
+    newStatus: string;
+    oldStatus: string | null;
+    timestamp: number;  // Stored as a string to handle large numbers or specific formats
 }
 
-// Main function to process all activity logs
-export function processActivityLogs(logs: ActivityLog[]): ItemDetails {
-    const items: ItemDetails = {};
+export interface ParsedActivityLogEntry {
+    pulseId: number;
+    pulseName: string;
+    statusChanges: StatusChange[];
+}
 
-    // Sort logs by timestamp using dayjs for comparison
-    logs.sort((a, b) => parseLogEntry(a).timestamp - parseLogEntry(b).timestamp);
-    logs.forEach(log => {
-        const {pulse_id, status, timestamp} = parseLogEntry(log);
+// Function to parse activity logs
+export function parseActivityLogs(rawLogData: ActivityLog[], columnId: string): ParsedActivityLogEntry[] {
+    const mergedLogs: Map<number, ParsedActivityLogEntry> = new Map();
+    rawLogData.forEach(log => {
+        if (log.event !== "update_column_value") return;
+        const logData = JSON.parse(log.data);
+        if (logData.column_id === columnId) {
+            const pulseId = logData.pulse_id;
+            const entry = mergedLogs.get(pulseId) || {
+                pulseId: pulseId,
+                pulseName: logData.pulse_name,
+                statusChanges: []
+            } as ParsedActivityLogEntry;
+            entry.statusChanges.push({
+                newStatus: logData.value.label.text,
+                oldStatus: logData.previous_value ? logData.previous_value.label.text : null,
+                timestamp: parseFloat(log.created_at.slice(0, 13))
+            });
 
-        // Initialize the item in the items map if it doesn't exist
-        if (!items[pulse_id]) {
-            items[pulse_id] = {statusDurationAndDetails: {}, currentStatusStartTime: timestamp, currentStatus: status};
-        } else {
-            // Check if the status has changed to update the start time and current status
-            if (items[pulse_id].currentStatus !== status) {
-                items[pulse_id].currentStatusStartTime = timestamp;
-                items[pulse_id].currentStatus = status;
-            }
+            mergedLogs.set(pulseId, entry);
         }
-
-        const item = items[pulse_id];
-        const previousDuration = dayjs(item.lastTimestamp) ? dayjs(timestamp).diff(item.lastTimestamp, 'minutes') : 0;
-
-        // Update the duration for the last status
-        if (item.lastStatus) {
-            item.statusDurationAndDetails[item.lastStatus] = (item.statusDurationAndDetails[item.lastStatus] || 0) + previousDuration;
-        }
-
-        // Update for next iteration
-        item.lastTimestamp = timestamp;
-        item.lastStatus = status;
     });
 
-    // Calculate duration in current status up to now for each item
-    Object.values(items).forEach(item => {
-        const now = dayjs();
-        const currentDuration = now.diff(item.currentStatusStartTime, 'minutes');
-
-        // Add the current duration to the total for the current status
-        item.statusDurationAndDetails[item.currentStatus] = (item.statusDurationAndDetails[item.currentStatus] || 0) + currentDuration;
-        if (item.currentStatus) {
-            item.statusDurationAndDetails[item.currentStatus] = (item.statusDurationAndDetails[item.currentStatus] || 0) + currentDuration;
-        }
-        // Cleanup
-        delete item.currentStatusStartTime;
-        delete item.lastTimestamp;
-        delete item.lastStatus;
+    // Convert the map to an array and sort the changes for each entry
+    const result = Array.from(mergedLogs.values());
+    result.forEach(entry => {
+        entry.statusChanges.sort((a, b) => a.timestamp - b.timestamp);
     });
-
-    return items;
+    return result;
 }
 
 // Example function to merge processed logs with additional details from items API
-export function mergeProcessedLogsAndItems(processedLogs: ItemDetails, itemsApiResponse: BoardApiResponse, columnId: string): ParsedLogs[] {
-    const mergedResults: ParsedLogs[] = [];
+export interface ProcessedItem {
+    id: string;
+    statusDurations: { status: string, duration: number }[];
+    totalDuration: number;
+    currentStatus: string;
+    itemName: string;
+    groupTitle: string;
+    people: string[];
+}
+
+export function mergeProcessedLogsAndItems(processedLogs: ParsedActivityLogEntry[], itemsApiResponse: any, columnId: string) {
+    const mergedResults: ProcessedItem[] = [];
+
+    const processedItemsSet = new Set(processedLogs.map(pi => String(pi.pulseId)));
+
     // Iterate through each item in the items API response
     itemsApiResponse.data.boards.forEach(board => {
         board.items_page.items.forEach(item => {
             const pulseId = item.id;
             const createdAt = item.created_at;
-            const processedItem = processedLogs[pulseId];
-            // Retrieve the current status and people columns
             const currentStatusColumn = item.column_values.find(cv => cv.id === columnId);
             const peopleColumn = item.column_values.filter(cv => cv.type === "people").map(cv => cv.text);
+            const columnSettings = parseColumnSettings(board.columns, columnId);
+            const defaultStatus = getDefaultStatus(columnSettings);
+            const hasProcessedLogs = processedItemsSet.has(pulseId);
 
-            // Check if the item has processed logs
-            if (processedItem) {
-                const statusDurationsArray: StatusDurationAndDetails[] = processedItem ? Object.entries(processedItem.statusDurationAndDetails).map(([status, duration]) => {
-                    return {
-                        status,
-                        duration: typeof duration === 'number' ? duration : 0, // or handle the case appropriately if not a number
-                    };
-                }) : [{
-                    status: "NEW",
-                    duration: dayjs().diff(dayjs(createdAt), 'minutes'),
-                }];
 
-                mergedResults.push({
-                    id: pulseId,
-                    statusDurationAndDetails: statusDurationsArray,
-                    totalDuration: statusDurationsArray.reduce((acc, item) => acc + item.duration, 0),
-                    currentStatus: currentStatusColumn ? currentStatusColumn.text : "",
-                    createdAt: createdAt,
-                    itemName: item.name,
-                    groupTitle: item.group.title,
-                    people: peopleColumn
-                });
-            } else {
-                // For items without activity logs, still include them with default values
-                mergedResults.push({
-                    id: pulseId,
-                    statusDurationAndDetails: [{
-                        status: "NEW",
-                        duration: dayjs().diff(createdAt, 'minutes'),
-                    }],
-                    totalDuration: dayjs().diff(createdAt, 'minutes'),
-                    currentStatus: "NEW",
-                    createdAt: createdAt,
-                    itemName: item.name,
-                    groupTitle: item.group.title,
-                    people: peopleColumn
-                });
-            }
+            // Calculate status durations
+            const statusDurations = hasProcessedLogs
+                ? calculateStatusDurations(processedLogs.find(pi => String(pi.pulseId) === pulseId)!.statusChanges, currentStatusColumn.text, defaultStatus, createdAt)
+                : { [currentStatusColumn.text]: dayjs().diff(createdAt, 'minutes') };
+
+            mergedResults.push({
+                id: pulseId,
+                statusDurations: Object.entries(statusDurations).map(([status, duration]) => ({ status, duration })),
+                totalDuration: Object.values(statusDurations).reduce((acc, duration) => acc + duration, 0),
+                currentStatus: currentStatusColumn.text,
+                itemName: item.name,
+                groupTitle: item.group.title,
+                people: peopleColumn
+            });
         });
     });
-
     return mergedResults;
+}
+
+function calculateStatusDurations(statusChanges: StatusChange[], currentStatus: string, defaultStatus: string, itemCreatedAt: string): StatusDurations {
+    const statusDurations: StatusDurations = {};
+    // Initialize the status durations with the default status and the time of the first status change or now if there are no status changes
+    const timeOfFirstStatusChange = statusChanges.length > 0 ? statusChanges[0].timestamp : dayjs().toISOString();
+    statusDurations[defaultStatus] = dayjs(timeOfFirstStatusChange).diff(dayjs(itemCreatedAt), 'minutes');
+
+    // Iterate through each status change
+    statusChanges.forEach((change, index) => {
+        const newStatus = change.newStatus;
+        const oldStatus = change.oldStatus || defaultStatus;
+        const duration = dayjs(change.timestamp).diff(dayjs(statusChanges[index - 1]?.timestamp || itemCreatedAt), 'minutes');
+        // If the status is the current status, update the duration
+        if (newStatus === currentStatus) {
+            statusDurations[oldStatus] = statusDurations[oldStatus] || 0;
+            statusDurations[oldStatus] += duration;
+
+            statusDurations[newStatus] = dayjs().diff(dayjs(change.timestamp), 'minutes');
+        } else {
+            statusDurations[newStatus] = statusDurations[newStatus] || 0;
+            statusDurations[newStatus] += duration;
+        }
+    });
+
+    return statusDurations;
+
+}
+
+function getDefaultStatus(settings: StatusSettings): string {
+    for (const key in settings.labels_colors) {
+        if (settings.labels_colors[key].var_name === 'grey') {
+            return settings.labels[key] || " ";
+        }
+    }
+    return " ";
 }
 
 export function lookupLabelColor(settings: StatusSettings, label: string): string {
@@ -158,42 +157,42 @@ export interface ColumnWidths {
     total?: { min: number; max: number };
 }
 
-export const getTimeInStatusColumns = (data: ParsedLogs[], customWidths: ColumnWidths): ITableColumn[] => {
+export const getTimeInStatusColumns = (data: ProcessedItem[], customWidths: ColumnWidths): ITableColumn[] => {
     let columns: ITableColumn[] = [
         {
             id: 'group',
             title: 'Group',
             loadingStateType: 'medium-text',
-            width: customWidths.group || { min: 200, max: 300 },
+            width: customWidths.group || {min: 200, max: 300},
         },
         {
             id: 'item_id',
             title: 'Item ID',
             loadingStateType: 'medium-text',
-            width: customWidths.item_id || { min: 200, max: 250 },
+            width: customWidths.item_id || {min: 200, max: 250},
         },
         {
             id: 'item_name',
             title: 'Name',
             infoContent: 'itemName',
-            width: customWidths.item_name || { min: 250, max: 350 }
+            width: customWidths.item_name || {min: 250, max: 350}
         },
         {
             id: 'assigned_to',
             title: 'Assigned To',
             loadingStateType: 'circle',
-            width: customWidths.assigned_to || { min: 120, max: 200 }
+            width: customWidths.assigned_to || {min: 120, max: 200}
         },
         {
             id: 'status',
             title: 'Status',
             loadingStateType: 'medium-text',
-            width: customWidths.status || { min: 150, max: 250 }
+            width: customWidths.status || {min: 150, max: 250}
         },
     ];
 
     // Identifying unique statuses across all items
-    const uniqueStatuses = new Set(data.flatMap(item => item.statusDurationAndDetails.map(sd => sd.status)));
+    const uniqueStatuses = new Set(data.flatMap(item => item.statusDurations.map(sd => sd.status)));
     // Dynamically adding columns for each unique status
     uniqueStatuses.forEach(status => {
         columns.push({
@@ -212,14 +211,14 @@ export const getTimeInStatusColumns = (data: ParsedLogs[], customWidths: ColumnW
         id: 'total',
         title: 'TOTAL',
         loadingStateType: 'medium-text',
-        width: customWidths.total || { min: 100, max: 200 }
+        width: customWidths.total || {min: 100, max: 200}
     });
 
     return columns;
 }
 
 
-export function extractTISTableData(data: ParsedLogs[], columns: ITableColumn[]) {
+export function extractTISTableData(data: ProcessedItem[], columns: ITableColumn[]) {
     return data.map(item => {
         // Transform item data to match columns for easy rendering
         return columns.reduce((acc, column) => {
@@ -245,7 +244,7 @@ export function extractTISTableData(data: ParsedLogs[], columns: ITableColumn[])
                     break;
                 default:
                     // Handle dynamic status columns
-                    const statusDuration = item.statusDurationAndDetails.find(sd => sd.status.toUpperCase() === column.title.toUpperCase());
+                    const statusDuration = item.statusDurations.find(sd => sd.status.toUpperCase() === column.title.toUpperCase());
                     acc[column.id] = statusDuration ? formatDuration(statusDuration.duration) : '0m';
                     break;
             }

@@ -1,4 +1,4 @@
-import React, {createContext, useContext, useState, useEffect, ReactNode} from 'react';
+import React, {createContext, useContext, useState, useEffect, ReactNode, useMemo} from 'react';
 import mondaySdk from 'monday-sdk-js';
 
 interface MondayContextData {
@@ -23,7 +23,6 @@ export const MondayProvider = ({children}) => {
     const [sessionToken, setSessionToken] = useState<any>()
 
     useEffect(() => {
-
         // Listening for context updates
         monday.listen('context', (res) => {
             setContext(res.data);
@@ -35,21 +34,21 @@ export const MondayProvider = ({children}) => {
         });
 
         monday.get('sessionToken').then((token) => setSessionToken(token))
-
     }, []);
 
     monday.execute('valueCreatedForUser')
 
+    // memoize the context value
+    const contextValue = useMemo(() => ({
+        context,
+        settings,
+        sessionToken,
+        isLoaded: !!context && !!settings,
+        monday,
+    }), [context, settings, sessionToken]);
+
     return (
-        <MondayContext.Provider value={
-            {
-                context,
-                settings,
-                sessionToken,
-                isLoaded: !!context && !!settings,
-                monday,
-            }
-        }>
+        <MondayContext.Provider value={contextValue}>
             {children}
         </MondayContext.Provider>
     );

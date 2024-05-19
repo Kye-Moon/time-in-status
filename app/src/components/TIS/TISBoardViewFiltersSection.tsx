@@ -19,12 +19,10 @@ export default function TISBoardViewFiltersSection() {
         label: string,
         value: string
     }[]>([])
-
     const [peopleLabelAndValue, setPeopleLabelAndValue] = React.useState<{
         label: string,
         value: string
     }[]>([])
-
     const [groupLabelAndValue, setGroupLabelAndValue] = React.useState<{
         label: string,
         value: string
@@ -32,29 +30,26 @@ export default function TISBoardViewFiltersSection() {
 
     React.useEffect(() => {
         if (boardUniqueStatuses) {
-            setStatusLabelAndValue(boardUniqueStatuses.map(status => ({label: status.toUpperCase(), value: status})))
+            setStatusLabelAndValue(boardUniqueStatuses)
         }
         if (boardUniquePeople) {
-            setPeopleLabelAndValue(boardUniquePeople.map(person => ({
-                label: person === '' ? 'Unassigned' : person,
-                value: person
-            })));
+            setPeopleLabelAndValue(boardUniquePeople)
         }
         if (boardUniqueGroups) {
-            setGroupLabelAndValue(boardUniqueGroups.map(group => ({label: group, value: group})))
+            setGroupLabelAndValue(boardUniqueGroups)
         }
-    }, [boardUniqueStatuses, boardUniquePeople])
+    }, [boardUniqueStatuses, boardUniquePeople, boardUniqueGroups])
 
     const handleStatusSelect = (selectedStatuses: any) => {
-        setSelectedStatuses(selectedStatuses?.map((status: any) => status.value) ?? [])
+        setSelectedStatuses(selectedStatuses)
     }
 
     const handlePeopleSelect = (selectedPeople: any) => {
-        setSelectedPeople(selectedPeople?.map((person: any) => person.value) ?? [])
+        setSelectedPeople(selectedPeople)
     }
 
-    const handleGroupSelect = (selectedGroups: any) => {
-        setSelectedGroups(selectedGroups?.map((group: any) => group.value) ?? [])
+    const handleGroupSelect = (selectedGroup: { label: string, value: string }) => {
+        setSelectedGroups(selectedGroup)
     }
 
     return (
@@ -65,9 +60,9 @@ export default function TISBoardViewFiltersSection() {
                     clearable={true}
                     title={'Group'}
                     options={groupLabelAndValue}
-                    multi={true}
+                    multi={false}
                     onChange={handleGroupSelect}
-                    value={selectedGroups?.map(group => ({label: group, value: group}))}
+                    value={selectedGroups}
                     placeholder={'Filter by Group'}
                 />
             </div>
@@ -79,7 +74,7 @@ export default function TISBoardViewFiltersSection() {
                     options={statusLabelAndValue}
                     multi={true}
                     onChange={handleStatusSelect}
-                    value={selectedStatuses?.map(status => ({label: status.toUpperCase(), value: status}))}
+                    value={selectedStatuses}
                     multiline={true}
                     placeholder={'Filter by status'}
                 />
@@ -92,7 +87,7 @@ export default function TISBoardViewFiltersSection() {
                     options={peopleLabelAndValue}
                     multi={true}
                     onChange={handlePeopleSelect}
-                    value={selectedPeople?.map(person => ({label: person === '' ? 'Unassigned' : person, value: person}))}
+                    value={selectedPeople}
                     placeholder={'Filter by person'}
                 />
             </div>
