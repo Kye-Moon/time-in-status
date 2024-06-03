@@ -14,7 +14,6 @@ import {
 import {extractTISTableData, getTimeInStatusColumns, hexToRgb, lookupLabelColor} from "../../../lib/service";
 import {ITEMS_PER_PAGE, useBoardViewDataContext} from "../../../context/TISBoardViewProvider";
 import TableBodyLoading from "../../Loading/TableBodyLoading";
-import {TextType} from "monday-ui-react-core/dist/types/components/Text/TextConstants";
 
 export default function TISTableSection() {
     const {

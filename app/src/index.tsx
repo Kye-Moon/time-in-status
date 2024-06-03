@@ -4,13 +4,16 @@ import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 import {MondayProvider} from "./context/MondayContext";
 import {RecoilRoot} from "recoil";
+import {SubscriptionProvider} from "./context/SubscriptionContext";
 
 const root = createRoot(document.getElementById("root"));
 root.render(
     <MondayProvider>
-        <RecoilRoot>
-            <App/>
-        </RecoilRoot>
+        {/*<SubscriptionProvider>*/}
+            <RecoilRoot>
+                <App/>
+            </RecoilRoot>
+        {/*</SubscriptionProvider>*/}
     </MondayProvider>
 );
 

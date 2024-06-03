@@ -117,14 +117,12 @@ export const TISBoardViewProvider = ({children}) => {
     // Monitor the selection criteria changes and regenerate the query params
     useEffect(() => {
         if (filtersInitialised) {
-            console.log('selection criteria changed')
             generateBoardQueryParams();
         }
     }, [selectedStatuses, selectedPeople, selectedGroups]);
 
     //Sync with instance level view settings run once on load
     useEffect(() => {
-        console.log('syncing with instance level view settings')
         const asyncFunc = async () => {
             setFiltersInitialised(false); // Set initialization to false before the async function starts
             const selectedStatuses = await monday.storage.instance.getItem('selectedStatuses')
@@ -154,12 +152,17 @@ export const TISBoardViewProvider = ({children}) => {
                 setSelectedGroups(undefined)
             } else {
                 const selected = selectedGroup?.data.value
-                setSelectedGroups(
-                    {
-                        label: boardUniqueGroups.find(uniqueGroup => uniqueGroup.value === selected)?.label || '',
-                        value: selected
-                    }
-                )
+                const label = boardUniqueGroups.find(uniqueGroup => uniqueGroup.value === selected)?.label
+                if (label) {
+                    setSelectedGroups(
+                        {
+                            label:label,
+                            value: selected
+                        }
+                    )
+                }else {
+                    setSelectedGroups(undefined)
+                }
             }
             setFiltersInitialised(true); // Set initialization to true after the async function completes
         }
@@ -168,7 +171,6 @@ export const TISBoardViewProvider = ({children}) => {
 
     //Get search filter options
     useEffect(() => {
-        setFiltersInitialised(false); // Set initialization to false before the async function starts
         const asyncFunc = async () => {
             const filterOptions = await monday.api(getFilterOptions({
                 boardId: context.boardId,
@@ -211,16 +213,15 @@ export const TISBoardViewProvider = ({children}) => {
         setSelectedGroups(group ? group : undefined)
     }
 
-    useEffectDebugger(() => {
-        // log to determine what has caused the re-render
+    useEffect(() => {
 
         async function fetchData() {
-            if (!context || !context?.boardId || !columnId || !filtersInitialised) {
+            if (!context || !context?.boardId || !columnId) {
                 return
             }
             setIsFetching(true)
             let boardData: GetBoardItemsResponse = {} as GetBoardItemsResponse
-            if (selectedGroups) {
+            if (selectedGroups && selectedGroups.value) {
                 const result = await monday.api(getBoardItemsByGroup({
                     boardId: context.boardId,
                     cursor: cursorHistory[pageIndex] || undefined,
@@ -232,10 +233,10 @@ export const TISBoardViewProvider = ({children}) => {
                         boards: [
                             {
                                 columns: result.data.boards[0].columns,
-                                items_count: result.data.boards[0].groups[0].items_page.items.length,
+                                items_count: result.data.boards[0].groups[0]?.items_page?.items.length || 0,
                                 items_page: {
-                                    cursor: result.data.boards[0].groups[0].items_page.cursor,
-                                    items: result.data.boards[0].groups[0].items_page.items
+                                    cursor: result.data.boards[0].groups[0]?.items_page?.cursor || '',
+                                    items: result.data.boards[0].groups[0]?.items_page?.items || []
                                 }
                             }
                         ]

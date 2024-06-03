@@ -91,9 +91,6 @@ export const getBoardItems = ({boardId, cursor, query_params}: {
                 items_page(limit: ${ITEMS_PER_PAGE} ${cursorQueryPart}, ${formattedQueryParams}) {
                       cursor
                       items{
-                        updates(limit: 10){
-                            body
-                        }
                         id
                         name
                         created_at
@@ -160,7 +157,7 @@ export const getBoardItemsByGroup = ({boardId, cursor, query_params, groupId}: {
     // Format the query parameters
     const formattedQueryParams = query_params ? `query_params: { rules: [${formatQueryParams(query_params)}], operator: or }` : '';
     return `
-        query{
+        query {
           boards(ids:["${boardId}"]){
             columns(types:[status]){
                  id
@@ -171,9 +168,6 @@ export const getBoardItemsByGroup = ({boardId, cursor, query_params, groupId}: {
                 items_page(limit: ${ITEMS_PER_PAGE} ${cursorQueryPart}, ${formattedQueryParams}) {
                       cursor
                       items{
-                        updates(limit: 10){
-                            body
-                        }
                         id
                         name
                         created_at
